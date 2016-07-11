@@ -6,5 +6,11 @@
 
 
 
+- Install:
+
+```
+
+pip install --upgrade git+git://github.com/cbentes/pytupi.git
 
 
+```
