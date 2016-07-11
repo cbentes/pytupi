@@ -1,0 +1,20 @@
+language: python
+
+python:
+  - "2.7"
+
+install:
+  # code below is taken from http://conda.pydata.org/docs/travis.html
+  - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda create -q -n pytupi_test python=2.7
+  - source activate pytupi_test
+  - pip install numpy
+  - pip install sklearn
+
+
+script: python test_all.py
