@@ -15,6 +15,6 @@ install:
   - source activate pytupi_test
   - pip install numpy
   - pip install sklearn
+  - pip install nose
 
-
-script: python test_all.py
+script: nosetests

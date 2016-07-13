@@ -1,0 +1,18 @@
+{
+  "mail": {
+    "user": "abc",
+    "password": "123"
+  },
+  "datasets": {
+    "test": {
+      "name": "test.pkl.gz",
+      "desc": "Test Only",
+      "uri": "http://127.0.0.1/test"
+    },
+    "mnist": {
+      "name": "mnist.pkl.gz",
+      "desc": "MNIST dataset",
+      "uri": "http://deeplearning.net/data/mnist/mnist.pkl.gz"
+    }
+  }
+}
