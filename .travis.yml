@@ -15,6 +15,10 @@ install:
   - source activate pytupi_test
   - pip install numpy
   - pip install sklearn
+  - pip install gdal
+  - pip install pyshp
+  - pip install cartopy
+  - pip install iris
   - pip install nose
 
 script: nosetests

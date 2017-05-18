@@ -1,14 +1,22 @@
+import abc
 
-class SARSensor:
 
+class SARSensor(object):
+
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
     def get_sensor_name(self):
-        raise NotImplementedError('Method not implemented')
+        pass
 
+    @abc.abstractmethod
     def get_image(self, channel):
-        raise NotImplementedError('Method not implemented')
+        pass
 
+    @abc.abstractmethod
     def get_number_channels(self):
-        raise NotImplementedError('Method not implemented')
+        pass
 
+    @abc.abstractmethod
     def get_image_type(self):
-        raise NotImplementedError('Method not implemented')
+        pass

@@ -1,4 +1,4 @@
 
-class SARImage:
+class SARImage(object):
     pass
 
