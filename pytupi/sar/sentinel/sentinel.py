@@ -1,3 +1,13 @@
+""" Sentinel-1 Representation
+
+Reference:
+
+- https://sentinel.esa.int/documents/247904/685163/S1-Radiometric-Calibration-V1.0.pdf
+
+
+C. Bentes - 2016
+"""
+
 import os
 import datetime
 
@@ -5,13 +15,14 @@ import numpy as np
 import gdal
 from PIL import Image
 import xmltodict
+import scipy.ndimage
 
 
 class Sentinel(object):
     """ Sentinel 1A 1B representation
     """
 
-    __version__ = 'v1.0_r2'
+    __version__ = 'v1.0_r3'
 
     def __init__(self, base_dir):
 
@@ -100,12 +111,52 @@ class Sentinel(object):
             self.range_index_table.append(pixel)
             self.datagrid_table.append(grid)
 
+        # Build calibration tree fom XML
+        self.cal_tree = None
+        with open(self.calibration_file, 'r') as f:
+            self.cal_tree = xmltodict.parse(f.read())
+
+        self.cal_line_index = []
+        self.cal_pixels_index = []
+        self.cal_sigma_mat = []
+        self.cal_beta_mat = []
+        self.cal_gamma_mat = []
+        self.cal_dn_mat = []
+
+        for calibrationVector in self.cal_tree['calibration']['calibrationVectorList']['calibrationVector']:
+            line = long(calibrationVector['line'])
+            pixels = map(long, calibrationVector['pixel']['#text'].split())
+            sigmaNought = map(float, calibrationVector['sigmaNought']['#text'].split())
+            betaNought = map(float, calibrationVector['betaNought']['#text'].split())
+            gamma = map(float, calibrationVector['gamma']['#text'].split())
+            dn = map(float, calibrationVector['dn']['#text'].split())
+            self.cal_line_index.append(line)
+            self.cal_pixels_index.append(pixels)
+            self.cal_sigma_mat.append(sigmaNought)
+            self.cal_beta_mat.append(betaNought)
+            self.cal_gamma_mat.append(gamma)
+            self.cal_dn_mat.append(dn)
+
+        self.cal_line_index = np.asarray(self.cal_line_index)
+        self.cal_pixels_index = np.asarray(self.cal_pixels_index)
+        self.cal_sigma_mat = np.asarray(self.cal_sigma_mat)
+        self.cal_beta_mat = np.asarray(self.cal_beta_mat)
+        self.cal_gamma_mat = np.asarray(self.cal_gamma_mat)
+        self.cal_dn_mat = np.asarray(self.cal_dn_mat)
+
     def get_image(self):
         img = self.get_raw_image()
         if self.productType == 'GRD':
             return img
         else:
             return self._deburst_image(img)
+
+    def get_expanded_sigma_mat(self):
+        expand_x = int(np.ceil(self.cal_pixels_index[0][-1] * 1.0 / self.cal_sigma_mat.shape[1]))
+        expand_y = int(np.ceil(self.cal_line_index[-1] * 1.0 / self.cal_sigma_mat.shape[0]))
+        expand_factor = (expand_y, expand_x)
+        expand_sigma_mat = scipy.ndimage.zoom(self.cal_sigma_mat, expand_factor, order=1)
+        return expand_sigma_mat
 
     def get_raw_image(self):
         # return self._load_tiff_image(self.image_file)[::-1]
@@ -167,9 +218,13 @@ class Sentinel(object):
     def getGeoLocation(self, x, y):
         """ GeoLocate the point (x,y) to (lat,lon)
         """
+        # TODO: fix this better, here transform to float
+        x = float(x)
+        y = float(y)
+
         y_time = datetime.timedelta(0, y*self.azimuthTimeInterval) + self.productFirstLineUtcTime
 
-        # Find range period
+        ## Find range period
         range_period = 0
         for i in range(1, len(self.range_index_table)):
             if self.range_index_table[i] == self.range_index_table[0]:

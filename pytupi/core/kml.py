@@ -21,7 +21,7 @@ def generate_kml_end_str():
     return kml_str
 
 
-def generate_kml_placemark_from_point(point_latlon, color = None):
+def generate_kml_placemark_from_point(point_latlon, color=None, info=None):
     """ Generates a placemark representation for a point [lat, lon]
     """
     if color is None:
@@ -39,6 +39,12 @@ def generate_kml_placemark_from_point(point_latlon, color = None):
     kml_str += '<coordinates>%f,%f,0 %f,%f,0 %f,%f,0 %f,%f,0 %f,%f,0 </coordinates>' % \
                (lon-d, lat-d, lon+d, lat-d, lon+d, lat+d, lon-d, lat+d, lon-d, lat-d)
     kml_str += '</LineString>'
+    if info is not None:
+        kml_str += '<ExtendedData>'
+        kml_str += '<Data name="Info">'
+        kml_str += '<value> {0} </value>'.format(info)
+        kml_str += '</Data>'
+        kml_str += '</ExtendedData>'
     kml_str += '</Placemark>'
     return kml_str
 

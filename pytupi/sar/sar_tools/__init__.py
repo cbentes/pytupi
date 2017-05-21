@@ -1,5 +1,7 @@
 from plot_tools import plot_img
 from plot_tools import plot_detections
+from plot_tools import plot_bbox_regions
+from plot_tools import plot_roi_frames
 
 from roi_frame import ROIFrame
 
